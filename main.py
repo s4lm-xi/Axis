@@ -12,15 +12,18 @@ SAMPLE_INTERVAL = 0.1      # seconds
 WINDOW_DURATION = 3        # seconds
 TARGET_SAMPLES  = int(WINDOW_DURATION / SAMPLE_INTERVAL)  # e.g. 30
 
-MODEL_PATH      = "model_lightgbm.txt"  # your saved model
-# If you have a list of label names in order, you can put them here:
-LABEL_NAMES     = [
-    "alsalam_alikum",
-    "good_morning",
-    "wht_ur_name",
-    "how_old_are_u",
-    "how_are_you"
-]  
+MODEL_PATH      = "model_lightgbm.txt"  
+LABEL_MAP_PATH = "class_labels.json"
+
+# Load label mapping (index -> class name)
+try:
+    with open(LABEL_MAP_PATH, 'r') as f:
+        label_map = json.load(f)
+    # Ensure keys are sorted and build a list
+    LABEL_NAMES = [label_map[str(i)] for i in range(len(label_map))]
+    print(f"Loaded {len(LABEL_NAMES)} label names from '{LABEL_MAP_PATH}'")
+except Exception as e:
+    raise RuntimeError(f"Failed to load label mapping: {e}")
 
 # --- SETUP GPIO & SENSORS ---
 GPIO.setmode(GPIO.BCM)
