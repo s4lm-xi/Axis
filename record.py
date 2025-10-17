@@ -72,24 +72,30 @@ def append_to_csv(row):
         writer.writerow(row)
     print(f"Appended to {CSV_FILE}: {row}")
 
-def button_callback(channel):
+def button_callback():
     """On button press: record window, sum it, and append to CSV with the session label."""
     samples = record_window()
     features = flatten_samples(samples)
     append_to_csv([label] + features)
 
-# Set up the button with a debounce
-GPIO.add_event_detect(BUTTON_GPIO, GPIO.FALLING, callback=button_callback, bouncetime=300)
-
 print("Ready. Press the button to record a 3‑second window.")
 
 try:
-    # Keep script running, waiting for button presses
+    button_was_pressed = False
+
     while True:
-        time.sleep(0.1)
+        if GPIO.input(BUTTON_GPIO) == GPIO.LOW:
+            if not button_was_pressed:
+                button_callback()
+                button_was_pressed = True
+        else:
+            button_was_pressed = False
+
+        time.sleep(0.01)  # Small delay to prevent CPU overuse
 
 except KeyboardInterrupt:
     print("\nExiting and cleaning up GPIO.")
 
 finally:
+    GPIO.cleanup()
     GPIO.cleanup()
